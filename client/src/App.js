@@ -12,9 +12,9 @@ function App() {
   const addItem = async (e) => {
     e.preventDefault();
     try{
-      const res = await axios.post('http://localhost:5500/api/item', {item: itemText})
-      setListItems(prev => [...prev, res.data]);
-      setItemText('');
+      const res = await axios.post('http://localhost:5500/api/item', {item: itemText}) // itemText el estado que agarro la info del input 
+      setListItems(prev => [...prev, res.data]); // para mantener la info previa, es decir las tareas anteriores
+      setItemText(''); // para clean el state
     }catch(err){
       console.log(err);
     }
@@ -24,9 +24,9 @@ function App() {
   useEffect(()=>{
     const getItemsList = async () => {
       try{
-        const res = await axios.get('http://localhost:5500/api/items')
-        setListItems(res.data);
-        console.log('render')
+        const res = await axios.get('http://localhost:5500/api/items') // la get 
+        setListItems(res.data); // lo carga al state, que gracias a lo del post mantiene todas incluyendo las que se vayan a crear 
+        console.log('render') // avisa que ya lo hizo, en consola
       }catch(err){
         console.log(err);
       }
@@ -35,11 +35,12 @@ function App() {
   },[]);
 
   // Delete item when click on delete
-  const deleteItem = async (id) => {
+  const deleteItem = async (id) => { //pasale id as param pa que te lo pueda agarrar--> recibe tomandolo del onClick del delete button la UI
     try{
       const res = await axios.delete(`http://localhost:5500/api/item/${id}`)
-      const newListItems = listItems.filter(item=> item._id !== id);
-      setListItems(newListItems);
+      console.log(res)// agregado by Ali
+      const newListItems = listItems.filter(item=> item._id !== id); // filtrar para que ya no esté rendered en la ui
+      setListItems(newListItems) // enviar indeed la function de filtrado para que actualice state
     }catch(err){
       console.log(err);
     }
@@ -47,14 +48,15 @@ function App() {
 
   //Update item
   const updateItem = async (e) => {
-    e.preventDefault()
+    e.preventDefault() //ps obvio pa que no refresque la pagina
     try{
-      const res = await axios.put(`http://localhost:5500/api/item/${isUpdating}`, {item: updateItemText})
-      console.log(res.data)
-      const updatedItemIndex = listItems.findIndex(item => item._id === isUpdating);
-      const updatedItem = listItems[updatedItemIndex].item = updateItemText;
-      setUpdateItemText('');
-      setIsUpdating('');
+      const res = await axios.put(`http://localhost:5500/api/item/${isUpdating}`, {item: updateItemText}) //setIsUpdating agarró el id con un onClick --> setIsUpdating(item._id) //updateItemText es lo que viene del input
+      console.log(res.data)// ali le puso eso aui
+      const updatedItemIndex = listItems.findIndex(item => item._id === isUpdating); //agarrar el index segun el id como parecido a redux --> y dice -> aca solo agarrale el index si el id del item coincide con el que te estoy dando
+      const updatedItem = listItems[updatedItemIndex].item = updateItemText; // y aca dice al item que tiene el index tal, metele el content que hay en el state
+      console.log(updatedItem) /*added by ali*/
+      setUpdateItemText(''); //cleaning el state
+      setIsUpdating(''); //cleaning el state
     }catch(err){
       console.log(err);
     }
@@ -71,7 +73,7 @@ function App() {
     <div className="App">
       <h1>Todo List</h1>
       <form className="form" onSubmit={e => addItem(e)}>
-        <input type="text" placeholder='Add Todo Item' onChange={e => {setItemText(e.target.value)} } value={itemText} />
+        <input type="text" placeholder='Add Todo Item' onChange={e => {setItemText(e.target.value)} } value={itemText} />{/*setItemText es el que actualiza el state que envías a axios.post*/}
         <button type="submit">Add</button>
       </form>
       <div className="todo-listItems">
@@ -80,10 +82,10 @@ function App() {
           <div className="todo-item">
             {
               isUpdating === item._id
-              ? renderUpdateForm()
+              ? renderUpdateForm() // renders el form que creaste para actualizar la tarea en cuestión
               : <>
                   <p className="item-content">{item.item}</p>
-                  <button className="update-item" onClick={()=>{setIsUpdating(item._id)}}>Update</button>
+                  <button className="update-item" onClick={()=>{setIsUpdating(item._id)}}>Update</button>{/* a través del onClick, agarra el id de la tarea a actualizar */}
                   <button className="delete-item" onClick={()=>{deleteItem(item._id)}}>Delete</button>
                 </>
             }
